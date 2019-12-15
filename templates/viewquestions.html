@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Questions | MCQ</title>
+{% endblock %}
+
+{% block upper %} MCQ {% if exam %} of {{ exam }} {% endif %}{% endblock %}
+
+{% block dipper %}
+<h3 class="card-header">MCQ Questions</h3>
+<button id="status_mcq" hidden>View</button>
+
+<div class="card-body" style="padding:0;">
+    <p align="left" style="margin-left:25px;margin-top:15px;">
+        <a href="{% url 'dashboard' %}"> <b><</b> Back to Dashboard</a> &nbsp;&nbsp;| &nbsp;&nbsp;
+        <a href="{% url 'add_question' exam.id %}">Add Questions <b>></b></a><br/>
+        <span class="badge badge-info">Added Questions :- {{ exam.num_valid_questions }}</span>
+    </p>
+<div style="overflow:scroll;height:350px;">
+    <ul class="list-group list-group-flush">
+        {% for mcq in MCQs %}{% if mcq.check_if_valid %}
+        <li id="q{{ forloop.counter }}" class="list-group-item" style="padding-top:0">
+            <div class="card border-dark shadow-lg" style="margin-top:12px;margin-bottom:12px;">
+                {% if mcq.media %}
+                <div class="row no-gutters">
+                    <div class="col-md-3 media">
+                        <img src="{{ mcq.media.url }}" class="card-img">
+                    </div>
+                    <div class="col-md-9">
+                        <h5 class="card-header">{{ forloop.counter }}.  {{ mcq.question|safe }}
+                            <p align="right"><a href="{% url 'edit_question' exam.id mcq.id %}">edit</a></p>
+                        </h5>
+                        <div class="card-body" style="padding:0">
+                            {% else %}
+                            <h5 class="card-header">{{ forloop.counter }}.  {{ mcq.question|safe }}
+                                <p align="right" style="margin-bottom:2px;"><a href="{% url 'edit_question' exam.id mcq.id %}">edit</a></p>
+                            </h5>
+                            {% endif %}
+                            <ul class="list-group list-group-flush" style="padding:0">
+                                {% for opt in mcq.get_choices %}
+                                <li class="list-group-item" style="padding:0">
+                                    <label name="label{{ mcq.id }}"
+                                           class="d-flex align-items-center border-secondary{% if opt.is_correct %} list-group-item-success{% endif %}" style="padding:12px;margin:0;">
+                                        <span style="margin:auto;">{{ opt.option|safe }}</span>
+                                    </label>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% if mcq.media %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </li>
+        {% endif %} {% endfor %}
+    </ul><br/>
+</div><hr/>
+</div>
+<div class="bg-light border-dark pb-3" style="overflow:scroll;position:fixed;right:1%;bottom:20%;height:auto;width:110px;">
+    <span class="btn badge-light">Question Numbers</span><br/>
+    {% for mcq in MCQs %}{% if mcq.check_if_valid %}
+        <a href="#q{{ forloop.counter }}" name="btnq{{ mcq.id }}" class="btn btn-sm btn-secondary"
+           style="padding-top:2px;padding-bottom:2px;padding-left:4px;padding-right:4px;">
+            {{ forloop.counter }}</a>
+    {%endif%}{%endfor%}
+</div>
+{% endblock %}
+
+{% block js_script %}
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="{% static 'paperview.js' %}"></script>
+{% endblock %}

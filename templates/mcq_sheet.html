@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block head %}
+    <title>Papers | MCQ</title>
+{% endblock %}
+
+{% block upper %} MCQ {% if exam %} of {{ exam }} {% endif %}{% endblock %}
+
+{% block dipper %}
+<h3 class="card-header">MCQ Questions</h3>
+<button id="status_mcq" hidden>not</button>
+<div class="card-body" style="padding:0;">
+
+    <form id="mcq_paper" method="post">
+<div style="overflow:scroll;height:350px;">
+    <button name="status" hidden>Started</button>
+        {% csrf_token %}
+        <ul class="list-group list-group-flush">
+
+            {% for mcq in MCQs %}{% if mcq.check_if_valid %}
+            <li id="q{{ forloop.counter }}" class="list-group-item" style="padding-top:0">
+
+                <div class="card border-dark shadow-lg" style="margin-top:12px;margin-bottom:12px;">
+                    {% if mcq.media %}
+                    <div class="row no-gutters">
+                        <div class="col-md-3 media">
+                            <img src="{{ mcq.media.url }}" class="card-img">
+                        </div>
+                        <div class="col-md-9">
+                            <h5 class="card-header">{{ forloop.counter }}.  {{ mcq.question|safe }}
+                            <button type="button" class="btn btn-sm btn-danger" name="{{ mcq.id }}" onclick="flag_it(this);" data-toggle="button" aria-pressed="false" autocomplete="off">
+                                 flag</button ></h5>
+                            <div class="card-body" style="padding:0">
+                    {% else %}
+                    <h5 class="card-header">{{ forloop.counter }}.  {{ mcq.question|safe }}
+                             <button type="button" class="btn btn-sm btn-danger" name="{{ mcq.id }}" onclick="flag_it(this);" data-toggle="button" aria-pressed="false" autocomplete="off">
+                                 flag</button ></h5>
+                    {% endif %}
+                    <ul class="list-group list-group-flush" style="padding:0">
+                    {% for opt in mcq.get_choices %}
+                    <li class="list-group-item" style="padding:0">
+                        <label name="label{{ mcq.id }}" class="d-flex align-items-center border-secondary" style="padding:12px;margin:0;">
+                            <input type="radio" class="btn-lg" name="{{ mcq.id }}" value="{{ opt.id }}"
+                                   onchange="swap_class(this);">
+                            <span style="margin:auto;">{{ opt.option|safe }}</span>
+                        </label>
+                    </li>
+                    {% endfor %}
+                        </ul>
+                        {% if mcq.media %}
+                        </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </li>
+            {% endif %} {% endfor %}
+        </ul>
+</div><br/><hr/>
+    <button class="btn btn-success btn-lg btn-block"
+                value="Submitted MCQ Answers"
+                type="submit">Submit Answers
+        </button>
+    </form>
+</div>
+
+<h1 id="time" content="{% url 'dashboard' %}">
+    <span id="end_time_hidden" hidden>{{ over }}</span>
+    <span id="time_span" class="btn btn-dark shadow-sm" style="position:fixed;left:0;bottom:0;">Time Left
+        <span id="time_hours" class="btn badge-light"></span>
+        <span class="badge badge-pill badge-secondary">Hours</span>
+        <span class="badge badge-dark"><b>:</b></span>
+        <span id="time_minutes" class="btn badge-light"></span>
+        <span class="badge badge-pill badge-secondary">Minutes</span>
+        <span class="badge badge-dark"><b>:</b></span>
+        <span id="time_seconds" class="btn badge-light"></span>
+        <span class="badge badge-pill badge-secondary">Seconds</span>
+    </span>
+</h1>
+<div class="bg-light border-dark pb-3" style="overflow:scroll;position:fixed;right:1%;bottom:20%;height:auto;width:110px;">
+    <span class="btn badge-light">Question Numbers</span><br/>
+    {% for mcq in MCQs %}{% if mcq.check_if_valid %}
+        <a href="#q{{ forloop.counter }}" name="btnq{{ mcq.id }}" class="btn btn-sm btn-secondary"
+           style="padding-top:2px;padding-bottom:2px;padding-left:4px;padding-right:4px;">
+            {{ forloop.counter }}</a>
+    {%endif%}{%endfor%}
+</div>
+
+{% endblock %}
+
+{% block js_script %}
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <!--<script type="text/javascript" src="{% static 'stop_refresh.js' %}"></script>-->
+    <script type="text/javascript" src="{% static 'mcq_js.js' %}"></script>
+    <script type="text/javascript" src="{% static 'countdownjs.js' %}"></script>
+{% endblock %}
